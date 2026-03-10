@@ -9,7 +9,7 @@ Personal portfolio & blog website for Carlo.
 - **Components:** shadcn/ui + 21st.dev registry
 - **Animations:** Framer Motion
 - **Blog:** next-mdx-remote + gray-matter + reading-time (MDX files in `content/posts/`)
-- **Deployment:** Vercel
+- **Deployment:** GitHub
 
 ## Commands
 ```bash
