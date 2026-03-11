@@ -4,11 +4,15 @@ import { useRef } from "react"
 import Link from "next/link"
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
 import { ArrowRight } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BlurFade } from "@/components/ui/blur-fade"
 import { Particles } from "@/components/ui/particles"
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern"
+import { RetroGrid } from "@/components/ui/retro-grid"
+import { HyperText } from "@/components/ui/hyper-text"
+import { TypingAnimation } from "@/components/ui/typing-animation"
+import { NeonGradientCard } from "@/components/ui/neon-gradient-card"
+import { BorderBeam } from "@/components/ui/border-beam"
+import { Meteors } from "@/components/ui/meteors"
 import { projects } from "@/lib/projects"
 
 const featuredProjects = projects.filter((p) => p.featured).slice(0, 3)
@@ -62,60 +66,78 @@ export default function Home() {
         ref={heroRef}
         className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center"
       >
-        {/* Animated background */}
+        {/* Layered sci-fi background */}
+        <RetroGrid
+          className="opacity-40"
+          angle={65}
+          cellSize={60}
+          darkLineColor="rgba(0,255,241,0.15)"
+          lightLineColor="rgba(100,100,100,0.15)"
+        />
         <Particles
           className="absolute inset-0"
-          quantity={80}
-          staticity={30}
-          ease={70}
-          color="#888888"
-          size={0.5}
+          quantity={60}
+          staticity={20}
+          ease={80}
+          color="#00FFF1"
+          size={0.4}
         />
-        <AnimatedGridPattern
-          className="absolute inset-0 opacity-30 [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
-          numSquares={30}
-          maxOpacity={0.3}
-          duration={3}
-          repeatDelay={1}
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Meteors number={12} minDuration={4} maxDuration={12} />
+        </div>
 
         <motion.div
           style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
           className="relative z-10 max-w-3xl"
         >
-          {/* Word-by-word reveal heading */}
           <BlurFade delay={0.1} duration={0.6}>
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               Hi, I&apos;m{" "}
-              <span className="relative inline-block">
-                <span className="animate-gradient bg-gradient-to-r from-primary via-primary/60 to-primary bg-[length:200%_auto] bg-clip-text text-transparent">
-                  Carlo
-                </span>
-              </span>
+              <HyperText
+                as="span"
+                duration={1200}
+                className="inline bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent text-5xl sm:text-6xl lg:text-7xl py-0"
+                animateOnHover
+              >
+                Carlo
+              </HyperText>
             </h1>
           </BlurFade>
 
-          <BlurFade delay={0.3} duration={0.6}>
-            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-              Full-stack developer crafting modern web experiences.
-              <br />
-              I build things that are fast, accessible, and delightful to use.
-            </p>
+          <BlurFade delay={0.4} duration={0.6}>
+            <div className="mt-6 text-lg text-muted-foreground sm:text-xl">
+              <TypingAnimation
+                as="p"
+                words={[
+                  "Full-stack developer crafting modern web experiences.",
+                  "I build things that are fast, accessible, and delightful.",
+                  "Turning ideas into performant, elegant code.",
+                ]}
+                duration={40}
+                deleteSpeed={20}
+                pauseDelay={2000}
+                loop
+                className="text-lg text-muted-foreground sm:text-xl leading-normal"
+                cursorStyle="block"
+              />
+            </div>
           </BlurFade>
 
-          <BlurFade delay={0.5} duration={0.6}>
+          <BlurFade delay={0.7} duration={0.6}>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="/projects"
-                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:shadow-lg hover:shadow-cyan-500/25"
               >
+                <BorderBeam size={40} duration={4} colorFrom="#00FFF1" colorTo="#ff00aa" />
                 View My Work{" "}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-md"
+                className="relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-border px-6 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-md"
               >
+                <BorderBeam size={40} duration={6} delay={2} colorFrom="#ff00aa" colorTo="#00FFF1" />
                 About Me
               </Link>
             </div>
@@ -136,25 +158,28 @@ export default function Home() {
           </div>
         </BlurFade>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" style={{ perspective: "1000px" }}>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" style={{ perspective: "1000px" }}>
           {featuredProjects.map((project, i) => (
             <BlurFade key={project.title} inView inViewMargin="-50px" delay={i * 0.15}>
               <TiltCard>
-                <Card className="h-full border transition-all hover:shadow-xl hover:shadow-primary/5">
-                  <CardHeader>
-                    <CardTitle>{project.title}</CardTitle>
-                    <CardDescription>{project.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <NeonGradientCard
+                  borderSize={1}
+                  borderRadius={16}
+                  neonColors={{
+                    firstColor: i === 0 ? "#00FFF1" : i === 1 ? "#ff00aa" : "#9c40ff",
+                    secondColor: i === 0 ? "#9c40ff" : i === 1 ? "#00FFF1" : "#ff00aa",
+                  }}
+                >
+                  <h3 className="text-lg font-semibold">{project.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </NeonGradientCard>
               </TiltCard>
             </BlurFade>
           ))}
@@ -197,15 +222,12 @@ export default function Home() {
           ].map((post, i) => (
             <BlurFade key={post.slug} inView inViewMargin="-50px" delay={i * 0.15}>
               <Link href={`/blog/${post.slug}`}>
-                <Card className="h-full transition-all hover:shadow-lg hover:-translate-y-1">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{post.title}</CardTitle>
-                    <CardDescription>{post.date}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">{post.description}</p>
-                  </CardContent>
-                </Card>
+                <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                  <BorderBeam size={60} duration={8} colorFrom="#00FFF1" colorTo="#9c40ff" />
+                  <h3 className="text-lg font-semibold">{post.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{post.date}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">{post.description}</p>
+                </div>
               </Link>
             </BlurFade>
           ))}

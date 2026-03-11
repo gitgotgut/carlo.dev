@@ -5,6 +5,7 @@ import { Github, Linkedin, Twitter, Mail } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Terminal, AnimatedSpan, TypingAnimation as TerminalTyping } from "@/components/ui/terminal"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -104,6 +105,31 @@ export default function AboutPage() {
                 </Card>
               ))}
             </div>
+          </motion.section>
+
+          {/* Terminal Section */}
+          <motion.section variants={itemVariants} className="space-y-6">
+            <h2 className="text-3xl font-bold text-black dark:text-white">System Info</h2>
+            <Terminal className="max-w-xl">
+              <TerminalTyping>&gt; carlo --version</TerminalTyping>
+              <AnimatedSpan delay={600} className="text-green-500">
+                <span>carlo.dev v2.0.0</span>
+              </AnimatedSpan>
+              <TerminalTyping delay={1200}>&gt; carlo --stack</TerminalTyping>
+              <AnimatedSpan delay={1800} className="text-cyan-400">
+                <span>  Frontend : React, Next.js, TypeScript, Tailwind</span>
+              </AnimatedSpan>
+              <AnimatedSpan delay={2100} className="text-cyan-400">
+                <span>  Backend  : Node.js, Python, PostgreSQL, REST</span>
+              </AnimatedSpan>
+              <AnimatedSpan delay={2400} className="text-cyan-400">
+                <span>  Tools    : Git, Docker, VS Code, Linux</span>
+              </AnimatedSpan>
+              <TerminalTyping delay={3000}>&gt; carlo --status</TerminalTyping>
+              <AnimatedSpan delay={3600} className="text-green-500">
+                <span>  Status: Available for new projects</span>
+              </AnimatedSpan>
+            </Terminal>
           </motion.section>
 
           {/* Experience Section */}
