@@ -192,7 +192,7 @@ export default function AboutPage() {
                 <CardContent>
                   <div className="flex gap-4">
                     <a
-                      href="https://github.com"
+                      href="https://github.com/gitgotgut"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
@@ -201,7 +201,7 @@ export default function AboutPage() {
                       <Github className="h-5 w-5 text-black dark:text-white" />
                     </a>
                     <a
-                      href="https://linkedin.com"
+                      href="https://linkedin.com/in/carlo"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
@@ -210,7 +210,7 @@ export default function AboutPage() {
                       <Linkedin className="h-5 w-5 text-black dark:text-white" />
                     </a>
                     <a
-                      href="https://twitter.com"
+                      href="https://x.com/carlo"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
