@@ -1,19 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { ExternalLink, Github } from "lucide-react"
 
 import type { Project } from "@/lib/projects"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { BorderBeam } from "@/components/ui/border-beam"
 
 interface ProjectCardProps {
   project: Project
@@ -21,54 +12,50 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="h-full"
-    >
-      <Card className="flex h-full flex-col shadow-sm transition-shadow duration-300 hover:shadow-lg">
-        {project.image && (
-          <div className="aspect-video w-full overflow-hidden rounded-t-xl bg-muted">
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              {project.title}
-            </div>
-          </div>
-        )}
+    <div className="group h-full">
+      <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-1">
+        <BorderBeam size={60} duration={8} colorFrom="#00FFF1" colorTo="#9c40ff" />
 
-        <CardHeader>
-          <CardTitle className="text-lg">{project.title}</CardTitle>
-          <CardDescription className="line-clamp-3">
-            {project.description}
-          </CardDescription>
-        </CardHeader>
+        <h3 className="text-lg font-semibold">{project.title}</h3>
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+          {project.description}
+        </p>
 
-        <CardContent className="flex-1">
-          <div className="flex flex-wrap gap-1.5">
-            {project.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {project.tags.map((tag) => (
+            <Badge key={tag} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
 
         {(project.github || project.live) && (
-          <CardFooter className="gap-2">
+          <div className="mt-4 flex gap-3 border-t border-border pt-4">
             {project.github && (
-              <Button variant="outline" size="sm" render={<a href={project.github} target="_blank" rel="noopener noreferrer" />}>
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-cyan-400"
+              >
                 <Github className="size-4" />
-                GitHub
-              </Button>
+                Source
+              </a>
             )}
             {project.live && (
-              <Button variant="outline" size="sm" render={<a href={project.live} target="_blank" rel="noopener noreferrer" />}>
+              <a
+                href={project.live}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-cyan-400"
+              >
                 <ExternalLink className="size-4" />
-                Live Demo
-              </Button>
+                Live
+              </a>
             )}
-          </CardFooter>
+          </div>
         )}
-      </Card>
-    </motion.div>
+      </div>
+    </div>
   )
 }

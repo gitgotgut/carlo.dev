@@ -1,36 +1,25 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Github, Linkedin, Twitter, Mail } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { BlurFade } from "@/components/ui/blur-fade"
+import { Particles } from "@/components/ui/particles"
+import { RetroGrid } from "@/components/ui/retro-grid"
+import { NeonGradientCard } from "@/components/ui/neon-gradient-card"
+import { BorderBeam } from "@/components/ui/border-beam"
+import { HyperText } from "@/components/ui/hyper-text"
 import { Terminal, AnimatedSpan, TypingAnimation as TerminalTyping } from "@/components/ui/terminal"
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const },
-  },
-}
 
 const skills = {
   Frontend: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
   Backend: ["Node.js", "Python", "PostgreSQL", "REST APIs"],
   Tools: ["Git", "Docker", "VS Code", "Linux"],
+}
+
+const skillColors: Record<string, { firstColor: string; secondColor: string }> = {
+  Frontend: { firstColor: "#00FFF1", secondColor: "#9c40ff" },
+  Backend: { firstColor: "#ff00aa", secondColor: "#00FFF1" },
+  Tools: { firstColor: "#9c40ff", secondColor: "#ff00aa" },
 }
 
 const experience = [
@@ -57,60 +46,99 @@ const experience = [
   },
 ]
 
+const socialLinks = [
+  { href: "https://github.com/gitgotgut", label: "GitHub", icon: Github },
+  { href: "https://linkedin.com/in/carlo", label: "LinkedIn", icon: Linkedin },
+  { href: "https://x.com/carlo", label: "X", icon: Twitter },
+]
+
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-white dark:bg-black">
-      <div className="mx-auto max-w-4xl px-6 py-20 sm:px-8 lg:px-10">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-          className="space-y-20"
-        >
-          {/* Hero Section */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <div className="space-y-3">
-              <h1 className="text-5xl font-bold tracking-tight text-black dark:text-white">
-                About Me
-              </h1>
-              <Separator className="w-12 bg-primary" />
-            </div>
-            <p className="max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
+    <div className="flex flex-col">
+      {/* Hero Section with background */}
+      <section className="relative flex min-h-[50vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
+        <RetroGrid
+          className="opacity-20"
+          angle={65}
+          cellSize={60}
+          darkLineColor="rgba(0,255,241,0.12)"
+          lightLineColor="rgba(100,100,100,0.1)"
+        />
+        <Particles
+          className="absolute inset-0"
+          quantity={30}
+          staticity={30}
+          ease={80}
+          color="#00FFF1"
+          size={0.4}
+        />
+
+        <div className="relative z-10 max-w-2xl">
+          <BlurFade delay={0.1} duration={0.6}>
+            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
+              About{" "}
+              <HyperText
+                as="span"
+                duration={1200}
+                className="inline bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent text-5xl sm:text-6xl py-0"
+                animateOnHover
+              >
+                Me
+              </HyperText>
+            </h1>
+          </BlurFade>
+
+          <BlurFade delay={0.3} duration={0.6}>
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
               I&apos;m a passionate full-stack developer with over 5 years of experience building
               modern web applications. I specialize in creating performant, user-friendly
-              interfaces with a focus on clean, maintainable code. When I&apos;m not coding, you can
-              find me contributing to open source projects or sharing knowledge with the
-              developer community.
+              interfaces with a focus on clean, maintainable code.
             </p>
-          </motion.section>
+          </BlurFade>
+        </div>
+      </section>
 
-          {/* Skills Section */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-3xl font-bold text-black dark:text-white">Skills & Expertise</h2>
-            <div className="grid gap-6 md:grid-cols-3">
-              {Object.entries(skills).map(([category, items]) => (
-                <Card key={category} className="border border-zinc-200 dark:border-zinc-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{category}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {items.map((skill) => (
-                        <Badge key={skill} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </motion.section>
+      {/* Skills Section */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-20">
+        <BlurFade inView inViewMargin="-100px" delay={0}>
+          <h2 className="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            Skills & Expertise
+          </h2>
+        </BlurFade>
 
-          {/* Terminal Section */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-3xl font-bold text-black dark:text-white">System Info</h2>
-            <Terminal className="max-w-xl">
+        <div className="grid gap-6 md:grid-cols-3">
+          {Object.entries(skills).map(([category, items], i) => (
+            <BlurFade key={category} inView inViewMargin="-50px" delay={i * 0.15}>
+              <NeonGradientCard
+                borderSize={1}
+                borderRadius={16}
+                neonColors={skillColors[category]}
+              >
+                <h3 className="text-lg font-semibold">{category}</h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {items.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </NeonGradientCard>
+            </BlurFade>
+          ))}
+        </div>
+      </section>
+
+      {/* Terminal Section */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-20">
+        <BlurFade inView inViewMargin="-100px" delay={0}>
+          <h2 className="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            System Info
+          </h2>
+        </BlurFade>
+
+        <BlurFade inView inViewMargin="-50px" delay={0.15}>
+          <div className="mx-auto max-w-xl">
+            <Terminal>
               <TerminalTyping>&gt; carlo --version</TerminalTyping>
               <AnimatedSpan delay={600} className="text-green-500">
                 <span>carlo.dev v2.0.0</span>
@@ -130,101 +158,82 @@ export default function AboutPage() {
                 <span>  Status: Available for new projects</span>
               </AnimatedSpan>
             </Terminal>
-          </motion.section>
+          </div>
+        </BlurFade>
+      </section>
 
-          {/* Experience Section */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-3xl font-bold text-black dark:text-white">Experience</h2>
-            <div className="space-y-4">
-              {experience.map((exp, index) => (
-                <Card
-                  key={index}
-                  className="border border-zinc-200 dark:border-zinc-800 transition-all hover:shadow-md dark:hover:shadow-zinc-900"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{exp.role}</CardTitle>
-                        <CardDescription>{exp.company}</CardDescription>
-                      </div>
-                      <Badge variant="outline" className="whitespace-nowrap">
-                        {exp.year}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+      {/* Experience Section */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-20">
+        <BlurFade inView inViewMargin="-100px" delay={0}>
+          <h2 className="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            Experience
+          </h2>
+        </BlurFade>
+
+        <div className="space-y-6">
+          {experience.map((exp, index) => (
+            <BlurFade key={index} inView inViewMargin="-50px" delay={index * 0.1}>
+              <div className="relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:shadow-cyan-500/5">
+                <BorderBeam size={80} duration={8} colorFrom="#00FFF1" colorTo="#9c40ff" />
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">{exp.role}</h3>
+                    <p className="text-sm text-muted-foreground">{exp.company}</p>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">
                       {exp.description}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 border-cyan-500/30 text-cyan-400">
+                    {exp.year}
+                  </Badge>
+                </div>
+              </div>
+            </BlurFade>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="mx-auto w-full max-w-5xl px-4 py-20">
+        <BlurFade inView inViewMargin="-100px" delay={0}>
+          <h2 className="mb-4 text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            Get In Touch
+          </h2>
+          <p className="mx-auto mb-10 max-w-xl text-center text-muted-foreground">
+            I&apos;m always interested in hearing about new opportunities and interesting projects.
+          </p>
+        </BlurFade>
+
+        <BlurFade inView inViewMargin="-50px" delay={0.15}>
+          <div className="mx-auto max-w-md space-y-6">
+            {/* Email CTA */}
+            <a
+              href="mailto:hello@carlo.dev"
+              className="group relative flex items-center justify-center gap-3 overflow-hidden rounded-xl bg-primary px-8 py-4 text-primary-foreground transition-all hover:shadow-lg hover:shadow-cyan-500/25"
+            >
+              <BorderBeam size={40} duration={4} colorFrom="#00FFF1" colorTo="#ff00aa" />
+              <Mail className="h-5 w-5" />
+              <span className="font-medium">hello@carlo.dev</span>
+            </a>
+
+            {/* Social Links */}
+            <div className="flex justify-center gap-4">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={link.label}
+                  className="relative inline-flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-1"
+                >
+                  <link.icon className="h-5 w-5" />
+                </a>
               ))}
             </div>
-          </motion.section>
-
-          {/* Contact Section */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="text-3xl font-bold text-black dark:text-white">Get In Touch</h2>
-            <p className="max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
-              I&apos;m always interested in hearing about new opportunities and interesting projects.
-              Feel free to reach out via email or connect with me on social media.
-            </p>
-
-            <div className="space-y-6">
-              {/* Email */}
-              <Card className="border border-zinc-200 dark:border-zinc-800">
-                <CardContent className="pt-6">
-                  <a
-                    href="mailto:hello@carlo.dev"
-                    className="inline-flex items-center gap-3 rounded-lg bg-primary px-6 py-3 text-primary-foreground transition-all hover:bg-primary/90"
-                  >
-                    <Mail className="h-5 w-5" />
-                    <span>hello@carlo.dev</span>
-                  </a>
-                </CardContent>
-              </Card>
-
-              {/* Social Links */}
-              <Card className="border border-zinc-200 dark:border-zinc-800">
-                <CardHeader>
-                  <CardTitle className="text-base">Connect With Me</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4">
-                    <a
-                      href="https://github.com/gitgotgut"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-                      aria-label="GitHub"
-                    >
-                      <Github className="h-5 w-5 text-black dark:text-white" />
-                    </a>
-                    <a
-                      href="https://linkedin.com/in/carlo"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-                      aria-label="LinkedIn"
-                    >
-                      <Linkedin className="h-5 w-5 text-black dark:text-white" />
-                    </a>
-                    <a
-                      href="https://x.com/carlo"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 bg-white transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-                      aria-label="Twitter"
-                    >
-                      <Twitter className="h-5 w-5 text-black dark:text-white" />
-                    </a>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.section>
-        </motion.div>
-      </div>
-    </main>
+          </div>
+        </BlurFade>
+      </section>
+    </div>
   )
 }

@@ -1,8 +1,9 @@
 import { getAllPosts } from "@/lib/mdx"
 import { BlogCards } from "./blog-cards"
+import { BlogHero } from "./blog-hero"
 
 export const metadata = {
-  title: "Blog",
+  title: "Blog | Carlo",
   description: "Thoughts on development, design, and building things for the web.",
 }
 
@@ -10,19 +11,15 @@ export default function BlogPage() {
   const posts = getAllPosts()
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-24">
-      <div className="mb-12">
-        <h1 className="text-3xl font-bold tracking-tight">Blog</h1>
-        <p className="mt-2 text-muted-foreground">
-          Thoughts on development, design, and building things for the web.
-        </p>
-      </div>
-
-      {posts.length === 0 ? (
-        <p className="text-muted-foreground">No posts yet. Check back soon!</p>
-      ) : (
-        <BlogCards posts={posts} />
-      )}
-    </main>
+    <div className="flex flex-col">
+      <BlogHero />
+      <section className="mx-auto w-full max-w-3xl px-6 py-20">
+        {posts.length === 0 ? (
+          <p className="text-center text-muted-foreground">No posts yet. Check back soon!</p>
+        ) : (
+          <BlogCards posts={posts} />
+        )}
+      </section>
+    </div>
   )
 }
