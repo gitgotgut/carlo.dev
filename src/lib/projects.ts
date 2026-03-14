@@ -1,4 +1,39 @@
+export interface ThesisExperiment {
+  id: number
+  name: string
+  description: string
+  maedev: number
+  rmsedev: number
+  mae?: number
+  rmse?: number
+}
+
+export interface ThesisData {
+  title: string
+  institution: string
+  date: string
+  researchQuestions: { id: string; question: string }[]
+  pipeline: { step: string; detail: string }[]
+  dataset: {
+    name: string
+    participants: number
+    trainSize: number
+    devSize: number
+    testSize: number
+    classDistribution: { label: string; pct: number }[]
+  }
+  experiments: ThesisExperiment[]
+  keyFindings: string[]
+  bestResult: {
+    model: string
+    mae: number
+    rmse: number
+    description: string
+  }
+}
+
 export interface Project {
+  slug: string
   title: string
   description: string
   tags: string[]
@@ -13,10 +48,16 @@ export interface Project {
     commitNarrative: string
     standout?: string
   }
+  thesis?: ThesisData
+}
+
+export function getProjectBySlug(slug: string): Project | undefined {
+  return projects.find((p) => p.slug === slug)
 }
 
 export const projects: Project[] = [
   {
+    slug: "e-daic-thesis",
     title: "e-daic-thesis",
     description:
       "Master's thesis reproducing and extending a language-only depression detection pipeline using the E-DAIC-WOZ dataset — 7 controlled experiments across prompting strategies, LLMs, and regression models.",
@@ -35,8 +76,147 @@ export const projects: Project[] = [
       standout:
         "Built 7 controlled experiments that each isolate a single variable in the pipeline, making it possible to attribute performance changes to specific decisions rather than confounding factors.",
     },
+    thesis: {
+      title:
+        "From Reproduction to Evaluation: A Language-Only Approach to Depression Detection Using Supervised Machine Learning",
+      institution: "IT University of Copenhagen",
+      date: "June 2025",
+      researchQuestions: [
+        {
+          id: "RQ1",
+          question:
+            "To what extent can the pipeline proposed by Sadeghi et al. be reproduced using the E-DAIC dataset?",
+        },
+        {
+          id: "RQ2",
+          question:
+            "Can the pipeline's predictive performance be improved by varying its components (e.g., prompting strategies, LLMs, transcript sources)?",
+        },
+        {
+          id: "RQ3",
+          question:
+            "Which combination of regression model and logit source yields the best PHQ-8 prediction on the E-DAIC dataset?",
+        },
+        {
+          id: "RQ4",
+          question:
+            "What new insights or limitations emerge from systematically evaluating these pipeline variations?",
+        },
+      ],
+      pipeline: [
+        { step: "Interview Audio", detail: "E-DAIC-WOZ clinical interviews" },
+        { step: "Whisper ASR", detail: "Automatic speech-to-text transcription" },
+        {
+          step: "GPT Summarization",
+          detail: "GPT-3.5-Turbo / GPT-4-Turbo feature extraction",
+        },
+        {
+          step: "DepRoBERTa",
+          detail: "Fine-tuned classification → logit features",
+        },
+        {
+          step: "SVR Regression",
+          detail: "Support Vector Regression → PHQ-8 score",
+        },
+      ],
+      dataset: {
+        name: "Extended DAIC-WOZ (E-DAIC)",
+        participants: 275,
+        trainSize: 163,
+        devSize: 56,
+        testSize: 56,
+        classDistribution: [
+          { label: "None (0–7)", pct: 63.0 },
+          { label: "Moderate (7–13)", pct: 21.9 },
+          { label: "Severe (14–24)", pct: 15.1 },
+        ],
+      },
+      experiments: [
+        {
+          id: 1,
+          name: "Baseline Reproduction",
+          description: "Reproducing Sadeghi et al. pipeline with Polynomial SVR",
+          maedev: 4.08,
+          rmsedev: 5.30,
+          mae: 5.07,
+          rmse: 5.91,
+        },
+        {
+          id: 2,
+          name: "Feature & Kernel Benchmark",
+          description:
+            "Testing feature combinations (logits, embeddings) with Linear/Poly/RBF kernels",
+          maedev: 3.64,
+          rmsedev: 4.74,
+        },
+        {
+          id: 3,
+          name: "Original vs Whisper Transcripts",
+          description:
+            "Comparing manual transcripts against Whisper ASR transcripts",
+          maedev: 3.52,
+          rmsedev: 4.79,
+          mae: 5.22,
+          rmse: 5.62,
+        },
+        {
+          id: 4,
+          name: "Weighted Classification Loss",
+          description:
+            "Applying class weights to DepRoBERTa to address class imbalance",
+          maedev: 4.12,
+          rmsedev: 5.45,
+        },
+        {
+          id: 5,
+          name: "Chain-of-Thought Prompting",
+          description:
+            "Using CoT prompting for GPT summarization (MAE improved to 4.64 but p=0.15)",
+          maedev: 3.76,
+          rmsedev: 4.75,
+          mae: 4.64,
+          rmse: 5.71,
+        },
+        {
+          id: 6,
+          name: "GPT-4-Turbo Upgrade",
+          description:
+            "Replacing GPT-3.5-Turbo with GPT-4-Turbo for feature extraction",
+          maedev: 3.53,
+          rmsedev: 4.72,
+          mae: 4.87,
+          rmse: 5.62,
+        },
+        {
+          id: 7,
+          name: "Regression Model Benchmark",
+          description:
+            "Comparing SVR, Random Forest, Gradient Boosting, KNN, Bayesian Ridge",
+          maedev: 3.71,
+          rmsedev: 4.62,
+          mae: 4.33,
+          rmse: 5.42,
+        },
+      ],
+      keyFindings: [
+        "ALL models fail to detect Severe depression cases — 0% recall across every experiment, revealing a critical blind spot in language-only approaches.",
+        "Bayesian Ridge + GPT-4-Turbo logits achieved the best result: MAE 4.33, RMSE 5.42 — a 14.6% improvement over the baseline.",
+        "Chain-of-Thought prompting improved MAE to 4.64 but was not statistically significant (p=0.15).",
+        "Whisper transcripts generalized better than original transcripts on the test set despite lower dev-set scores.",
+        "Class weighting was ineffective — it worsened minority class performance rather than improving it.",
+        "GPT-4-Turbo improved RMSE from 5.91 to 5.62 with Linear SVR, suggesting richer features help downstream regression.",
+      ],
+      bestResult: {
+        model: "Bayesian Ridge + GPT-4-Turbo Logits",
+        mae: 4.33,
+        rmse: 5.42,
+        description:
+          "Combining Bayesian Ridge regression with GPT-4-Turbo logit features yielded the best PHQ-8 prediction, improving 14.6% over the Polynomial SVR baseline.",
+      },
+    },
   },
   {
+    slug: "devteam",
     title: "DevTeam",
     description:
       "A multi-agent orchestrator that simulates a virtual dev team (PM, Coordinator, Backend Dev, Frontend Dev, QA) using manual prompt-handoff — no API keys, no network calls, pure stdlib Python.",
@@ -57,6 +237,7 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "hugo-subscription-tracker",
     title: "Hugo (SubscriptionTracker)",
     description:
       "Full-stack subscription management SaaS — Gmail/Outlook AI import, multi-currency tracking, household sharing, insurance analysis, and spending insights. Built using the DevTeam agent-pack.",
@@ -77,6 +258,7 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "carlo-dev",
     title: "carlo.dev",
     description:
       "This portfolio site — built with Next.js, Tailwind CSS v4, and sci-fi themed MagicUI animations. Fully open source.",

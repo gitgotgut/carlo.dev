@@ -112,9 +112,9 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
               <TypingAnimation
                 as="p"
                 words={[
-                  "Full-stack developer crafting modern web experiences.",
-                  "I build things that are fast, accessible, and delightful.",
-                  "Turning ideas into performant, elegant code.",
+                  "I bridge business problems and technical solutions through design.",
+                  "Building tools that solve real problems for real teams.",
+                  "Combining IT management with software design thinking.",
                 ]}
                 duration={40}
                 deleteSpeed={20}
@@ -164,7 +164,7 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
           {featuredProjects.map((project, i) => (
             <BlurFade key={project.title} inView inViewMargin="-50px" delay={i * 0.15}>
               <TiltCard>
-                <Link href={project.github && project.github !== "#" ? project.github : "/projects"}>
+                <Link href={`/projects/${project.slug}`}>
                   <NeonGradientCard
                     borderSize={1}
                     borderRadius={16}
