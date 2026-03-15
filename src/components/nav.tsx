@@ -19,6 +19,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/projects", label: "Projects" },
+  { href: "/case-studies", label: "Case Studies" },
   { href: "/log", label: "Log" },
   { href: "/about", label: "About" },
 ]
@@ -50,7 +51,8 @@ export function Nav() {
               href={link.href}
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground",
-                pathname === link.href
+                (pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href)))
                   ? "text-foreground"
                   : "text-muted-foreground"
               )}
@@ -89,7 +91,8 @@ export function Nav() {
                     onClick={() => setOpen(false)}
                     className={cn(
                       "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
-                      pathname === link.href
+                      (pathname === link.href ||
+                        (link.href !== "/" && pathname.startsWith(link.href)))
                         ? "text-foreground"
                         : "text-muted-foreground"
                     )}

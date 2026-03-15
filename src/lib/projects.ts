@@ -32,6 +32,15 @@ export interface ThesisData {
   }
 }
 
+export interface CaseStudy {
+  problem: string
+  approach: string
+  outcome: string
+  role: string
+  metrics?: { label: string; value: string }[]
+  context?: string
+}
+
 export interface Project {
   slug: string
   title: string
@@ -49,10 +58,19 @@ export interface Project {
     standout?: string
   }
   thesis?: ThesisData
+  caseStudy?: CaseStudy
 }
 
 export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug)
+}
+
+export function getCaseStudyProjects(): Project[] {
+  return projects.filter((p) => p.caseStudy !== undefined)
+}
+
+export function getCaseStudyBySlug(slug: string): Project | undefined {
+  return projects.find((p) => p.slug === slug && p.caseStudy !== undefined)
 }
 
 export const projects: Project[] = [
@@ -214,6 +232,22 @@ export const projects: Project[] = [
           "Combining Bayesian Ridge regression with GPT-4-Turbo logit features yielded the best PHQ-8 prediction, improving 14.6% over the Polynomial SVR baseline.",
       },
     },
+    caseStudy: {
+      problem:
+        "Mental health screening is severely bottlenecked by clinical access — there aren't enough psychiatrists to assess everyone who needs screening. This thesis explored a specific research question: can language alone (interview transcripts + LLMs) reliably predict PHQ-8 depression severity scores, and which parts of an existing published pipeline actually matter?",
+      approach:
+        "Rather than proposing a novel architecture, I reproduced an existing published pipeline (Sadeghi et al.) as a verified baseline, then ran 7 controlled experiments that each isolate a single variable: prompting strategy, LLM choice, transcript source (Whisper vs manual), regression model, class weighting, and fine-tuning approach. Each experiment was isolated with its own models, features, and execution logic to prevent confounding.",
+      outcome:
+        "Identified that ALL models — regardless of configuration — fail to detect severe depression cases (0% recall), revealing a fundamental blind spot in language-only approaches to clinical screening. Best configuration (Bayesian Ridge + GPT-4-Turbo logits) achieved a 14.6% improvement over baseline (MAE 4.33, RMSE 5.42). Chain-of-Thought prompting improved MAE but was not statistically significant. Whisper transcripts generalized better than expert transcriptions on the test set.",
+      role: "Solo researcher. Designed and implemented the full experiment framework in Python, reproduced the baseline from a published paper, ran all 7 experiments, analyzed results, and wrote the thesis. Advisors provided feedback on methodology; all implementation and analysis was mine.",
+      metrics: [
+        { label: "Experiments", value: "7" },
+        { label: "Baseline improvement", value: "14.6%" },
+        { label: "Dataset participants", value: "275" },
+        { label: "Severe case recall", value: "0%" },
+      ],
+      context: "Solo research project · IT University of Copenhagen · 6 months",
+    },
   },
   {
     slug: "devteam",
@@ -235,6 +269,21 @@ export const projects: Project[] = [
       standout:
         "The design workflow integration with Pencil (export designs → specs → tokens → agents reference them automatically) bridges the gap between visual design and AI-assisted development without any manual translation step.",
     },
+    caseStudy: {
+      problem:
+        "Most AI agent frameworks require API keys, cloud infrastructure, and opaque orchestration logic. For developers who want to use LLMs to simulate a dev team workflow but don't want vendor lock-in or hidden token costs, there was no portable, inspectable option. The problem is also conceptual: how do you structure multi-agent handoffs when you are the runtime?",
+      approach:
+        "Build a zero-dependency Python CLI (stdlib only) that structures a full dev team workflow into sequential, manually-executed prompt handoffs. Five roles (PM, Coordinator, Backend Dev, Frontend Dev, QA) each have templated prompts that reference previous agents' outputs. You copy prompts into Claude, paste the response back, and advance the stage. Approval gates are built in for sensitive operations. The constraint of stdlib-only forced clean architecture — no framework crutches.",
+      outcome:
+        "A working agent orchestration system used as the scaffold for Hugo (SubscriptionTracker) — a full-stack SaaS with 27 commits across 2 weeks. DevTeam's PM specs prevented scope creep; its QA prompts caught bugs that manual testing missed. The project demonstrated that the overhead of structured agent handoffs pays off in output quality, and that manual prompt execution is a feature (full visibility, easy course-correction) not a limitation.",
+      role: "Sole designer and developer. Conceived the architecture, wrote all 5 agent prompt templates, built the CLI orchestration logic, and integrated the design workflow (Pencil export → design specs → agent context).",
+      metrics: [
+        { label: "Agent roles", value: "5" },
+        { label: "Dependencies", value: "0" },
+        { label: "Projects built with it", value: "1" },
+      ],
+      context: "Solo project · February 2025 · shipped as single complete system",
+    },
   },
   {
     slug: "hugo-subscription-tracker",
@@ -255,6 +304,22 @@ export const projects: Project[] = [
         "Intense 2-week sprint from Feb 25 to Mar 10, 2026 with 27 commits. Day 1: MVP scaffold with full CRUD, auth, multi-currency, household sharing, and 17 passing tests. Days 2-3: Gmail integration, feature landing pages, spending insights, trial alerts. Days 4-5: Outlook integration, FAQ/pricing/about pages, login redesign, brand rename to Hugo. Week 2: insurance module, AI document analysis, full Danish i18n, brand redesign (Proposal C), Confluence documentation, and CLAUDE.md conventions. The commit messages show a disciplined feature-per-commit cadence with co-authored Claude attribution throughout.",
       standout:
         "The project is a live proof-of-concept for the DevTeam agent-pack — it was scaffolded using that orchestrator, making it both a product and a case study of AI-assisted development. The Gmail/Outlook AI import pipeline (scan inbox → Claude extracts subscriptions → review modal → import) is the kind of feature that sounds simple but required careful OAuth, email parsing, and AI prompt engineering.",
+    },
+    caseStudy: {
+      problem:
+        "People lose track of recurring subscriptions — across multiple currencies, email providers, and billing cycles. Existing tools either require manual data entry or don't handle multi-currency, household sharing, or insurance policies. The real problem: users don't know what they're paying for until the credit card statement arrives.",
+      approach:
+        "Full-stack Next.js SaaS built using DevTeam agent orchestration. PM specs defined scope before a line of code was written. Core bets: (1) AI inbox scanning using Claude Haiku to extract recurring charges from Gmail/Outlook, reducing onboarding friction to near-zero; (2) multi-currency with live exchange rates; (3) household sharing via JWT email invites. Rebranded mid-development (Subtrack → Hugo) after a design system decision to use Slate Blue + Terracotta.",
+      outcome:
+        "Full production-ready SaaS in a 2-week sprint: Gmail and Outlook OAuth integrations, AI subscription extraction with high enough accuracy to ship without a human review step, cancel calculator with direct links for ~80 services, insurance module with AI document analysis, full Danish i18n, Vercel Cron renewal alerts, and spending trend charts. 27 commits with a feature-per-commit cadence. Live proof-of-concept that DevTeam agent orchestration produces shippable code.",
+      role: "Product owner, architect, and sole developer. Used DevTeam to scaffold specs and plans, then implemented everything: auth, database schema, two OAuth integrations, AI pipelines, i18n, design system, and deployment config.",
+      metrics: [
+        { label: "Commits", value: "27" },
+        { label: "Sprint duration", value: "2 weeks" },
+        { label: "Email providers integrated", value: "2" },
+        { label: "Services with cancel links", value: "~80" },
+      ],
+      context: "Solo · Feb–Mar 2026 · AI-assisted with DevTeam orchestrator",
     },
   },
   {
