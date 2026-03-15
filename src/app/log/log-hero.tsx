@@ -5,7 +5,7 @@ import { Particles } from "@/components/ui/particles"
 import { RetroGrid } from "@/components/ui/retro-grid"
 import { HyperText } from "@/components/ui/hyper-text"
 
-export function BlogHero() {
+export function LogHero() {
   return (
     <section className="relative flex min-h-[40vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
       <RetroGrid
@@ -33,14 +33,14 @@ export function BlogHero() {
               className="inline bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent text-5xl sm:text-6xl py-0"
               animateOnHover
             >
-              Blog
+              Log
             </HyperText>
           </h1>
         </BlurFade>
 
         <BlurFade delay={0.3} duration={0.6}>
           <p className="mt-4 text-lg text-muted-foreground">
-            Thoughts on code, design, and everything in between.
+            Tracking what I learn, build, and think about.
           </p>
         </BlurFade>
       </div>

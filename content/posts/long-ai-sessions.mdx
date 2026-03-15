@@ -1,0 +1,92 @@
+---
+title: "Running Long AI Sessions Without Losing the Plot"
+date: "2026-03-15"
+description: "Your AI coding session breaks down after an hour. Here's why, and what to do about it."
+tags: ["ai", "agents", "context-management", "productivity"]
+---
+
+# Running Long AI Sessions Without Losing the Plot
+
+You're an hour into a refactor. Claude has been solid — reading files, making changes, running tests. Then something shifts. It suggests a pattern you explicitly rejected forty minutes ago. It re-reads a file it already summarized. It starts hedging on decisions it made confidently earlier.
+
+You haven't changed. The model hasn't changed. But the context window is full, and the session is rotting from the inside.
+
+## Why Long Sessions Break Down
+
+Every message in a conversation — yours, Claude's, tool results, file contents, search outputs — adds tokens to the context window. A single file read can add thousands of tokens. A codebase exploration with multiple grep and glob calls can add tens of thousands.
+
+As the window fills past roughly 70% capacity, the model's ability to attend to specific earlier information starts degrading. Past 85%, you'll see hallucinations increase — the model confidently states things that contradict information it was given earlier in the session.
+
+This isn't forgetfulness. It's an attention problem. The model processes the entire context on every response, but with more tokens competing for attention, earlier details get less weight. The most recent messages dominate, which is why Claude might repeat a recently-discussed approach even if you rejected it earlier — the rejection is buried under newer, louder signal.
+
+For short tasks — fix a bug, write a component, add a test — this rarely matters. But for tasks that span hours or multiple sessions — large refactors, feature implementations, migrations — context management becomes the difference between shipping and spinning.
+
+## Structured Note-Taking Outside the Context
+
+The most effective strategy for long-running work is deceptively simple: **write notes to files, not to the conversation.**
+
+When Claude makes an architectural decision, have it write that decision to a progress file. When you complete a subtask, update a to-do list on disk. When you encounter a constraint that will matter later, log it somewhere persistent.
+
+```markdown
+<!-- claude-progress.md -->
+## Decisions
+- Using Tailwind v4 class syntax (not v3 compat mode)
+- Server components by default, "use client" only for interactivity
+- MDX processing happens at build time, not runtime
+
+## Completed
+- [x] Set up content/posts directory
+- [x] Implement getAllPosts with gray-matter
+- [x] Add reading time calculation
+
+## Blocked
+- Image optimization: need to decide between next/image and custom solution
+
+## Constraints
+- No emoji in UI unless user requests it
+- All dates in ISO format in frontmatter
+```
+
+This file lives outside the context window. When you start a new session — or when compaction summarizes the conversation — these notes persist. Claude can read the file at the start of the next session and pick up exactly where you left off, without the 40,000 tokens of conversation history that led to those decisions.
+
+The key insight: the context window is working memory. Files are long-term memory. Use each for what it's good at.
+
+## Compaction: Summarize Without Losing What Matters
+
+**Compaction** is the process of condensing a long conversation into a shorter summary while preserving essential information. In Claude Code, this happens when the context gets too large — the system summarizes the conversation so far, freeing up space for new work.
+
+The challenge is that not everything compacts well. A summary might capture "we decided to use server components" but lose the nuance of "we decided to use server components because the data fetching pattern requires it, and client components caused a hydration mismatch with the MDX renderer."
+
+This is why structured note-taking matters. If your important decisions are in a file, compaction can't lose them. The conversation gets summarized, but `claude-progress.md` still has the full context.
+
+You can also be proactive about compaction. When you notice a session getting long:
+
+1. Ask Claude to summarize key decisions and open questions
+2. Write those to a progress file
+3. Clear the conversation with `/clear`
+4. Start fresh, pointing Claude at the progress file
+
+This manual compaction gives you control over what survives. Automatic compaction is good but imperfect — it might preserve information you don't need and compress details you do.
+
+## Net Productivity Over Speed
+
+There's a tempting metric when using AI tools: how fast can I generate code? But speed without accuracy is negative productivity. Every incorrect output that you accept, debug, and fix costs more than if you'd written it correctly the first time.
+
+The real metric is **net productivity**: correct outputs minus the cost of fixing incorrect ones. A session that produces five correct implementations in two hours beats a session that produces twenty implementations in one hour if fifteen of them need manual correction.
+
+This reframes how you should think about long sessions:
+
+- **A clean, shorter session beats a long, cluttered one.** Don't chase continuity for its own sake. If the context is degraded, starting fresh is faster.
+- **Verification loops save time even though they cost tokens.** Running tests after every change catches issues immediately instead of letting them compound.
+- **Fewer, larger tasks beat many small ones.** Each task switch in a long session adds setup context. Batching related work reduces overhead.
+- **Subagents are speed multipliers.** They explore in parallel without degrading your main context. Three subagents researching different aspects of a problem give you the breadth of a long investigation with none of the context cost.
+
+The developers I've seen get the most from AI aren't the fastest. They're the ones who rarely need to redo work. Their sessions are shorter, their outputs are more reliable, and they spend less time debugging AI-generated code because they set up verification and context management upfront.
+
+## Managing the Session, Not Just the Code
+
+The uncomfortable truth about long AI sessions is that they require a new kind of attention. You're not just thinking about the code — you're thinking about the state of the conversation itself. Is the context clean? Has it been polluted by failed approaches? Are important decisions at risk of being compacted away?
+
+This is overhead, and it's fair to question whether it's worth it. My experience says yes, but with a caveat: the overhead decreases as you build intuition. You start sensing when a session is degrading before Claude's outputs show it. You instinctively reach for subagents on exploration tasks. You write decisions to files without thinking about it.
+
+The skill isn't typing faster or prompting better. It's developing a feel for context — knowing when it's clean, when it's cluttered, and when it's time to save your notes and start fresh.

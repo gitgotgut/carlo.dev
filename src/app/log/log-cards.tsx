@@ -6,12 +6,12 @@ import { BorderBeam } from "@/components/ui/border-beam"
 import { BlurFade } from "@/components/ui/blur-fade"
 import type { Post } from "@/lib/mdx"
 
-export function BlogCards({ posts }: { posts: Post[] }) {
+export function LogCards({ posts }: { posts: Post[] }) {
   return (
     <div className="grid gap-6">
       {posts.map((post, index) => (
         <BlurFade key={post.slug} inView inViewMargin="-50px" delay={index * 0.1}>
-          <Link href={`/blog/${post.slug}`}>
+          <Link href={`/log/${post.slug}`}>
             <div className="relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-1">
               <BorderBeam size={80} duration={8} colorFrom="#00FFF1" colorTo="#9c40ff" />
               <h3 className="text-lg font-semibold">{post.title}</h3>

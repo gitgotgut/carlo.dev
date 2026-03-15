@@ -203,16 +203,16 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
         </BlurFade>
       </section>
 
-      {/* Latest Blog Posts */}
+      {/* Latest Log Entries */}
       {latestPosts.length > 0 && (
         <section className="mx-auto w-full max-w-6xl px-4 py-20">
           <BlurFade inView inViewMargin="-100px" delay={0}>
             <div className="mb-12 text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Latest Posts
+                Latest Log Entries
               </h2>
               <p className="mt-3 text-muted-foreground">
-                Thoughts on code, design, and everything in between.
+                Tracking what I learn, build, and think about.
               </p>
             </div>
           </BlurFade>
@@ -220,7 +220,7 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {latestPosts.map((post, i) => (
               <BlurFade key={post.slug} inView inViewMargin="-50px" delay={i * 0.15}>
-                <Link href={`/blog/${post.slug}`}>
+                <Link href={`/log/${post.slug}`}>
                   <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
                     <h3 className="text-lg font-semibold">{post.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -240,10 +240,10 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
           <BlurFade inView delay={0.3}>
             <div className="mt-8 text-center">
               <Link
-                href="/blog"
+                href="/log"
                 className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                Read the blog{" "}
+                Read the log{" "}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

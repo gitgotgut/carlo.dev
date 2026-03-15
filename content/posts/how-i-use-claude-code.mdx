@@ -1,0 +1,107 @@
+---
+title: "How I Actually Use Claude Code"
+date: "2026-03-15"
+description: "Skip the tutorials. Here are the patterns that survive daily use."
+tags: ["claude-code", "workflow", "productivity", "ai"]
+---
+
+# How I Actually Use Claude Code
+
+Most Claude Code tutorials show the happy path: type a prompt, get perfect code, ship it. The daily reality is messier. You get code that almost works. You correct something, and the fix breaks something else. You're three hours into a session and the model starts suggesting things you explicitly ruled out an hour ago.
+
+After months of building with Claude Code — including shipping this entire portfolio site — I've settled on a handful of patterns that consistently produce good results. None of them are about writing better prompts.
+
+## Verification Over Prompting
+
+This is the single highest-leverage pattern, and it's almost embarrassingly simple: **give Claude a way to check its own work.**
+
+Instead of spending time crafting the perfect prompt, spend that time setting up verification. Write the test first, then ask Claude to implement. Give it a screenshot of what the UI should look like. Provide expected outputs for edge cases. The model will iterate against these checks far more reliably than it will interpret your prose description of what you want.
+
+Here's what this looks like in practice:
+
+```bash
+# Instead of: "Write a function that parses dates correctly"
+# Do this:
+
+# 1. Write the test first
+# 2. Ask Claude to make it pass
+# 3. Let it verify its own work
+```
+
+```ts
+// Give Claude this test file first:
+describe("parseDate", () => {
+  it("handles ISO format", () => {
+    expect(parseDate("2026-03-15")).toEqual(new Date(2026, 2, 15))
+  })
+  it("handles relative dates", () => {
+    expect(parseDate("yesterday")).toBeDefined()
+  })
+  it("returns null for garbage", () => {
+    expect(parseDate("not a date")).toBeNull()
+  })
+})
+
+// Then: "Implement parseDate to pass these tests. Run them after."
+```
+
+The test becomes the specification. Claude can run it, see what fails, and fix its own mistakes without you being in the loop. This shifts your role from reviewer to architect — you define what "correct" means, and the tool handles getting there.
+
+For UI work, screenshots serve the same purpose. Ask Claude to take a screenshot after making changes and compare it against your expectations. Visual verification catches layout issues that no amount of code review would surface.
+
+## Subagents as Context Shields
+
+When you need to explore something — search the codebase, research an API, investigate a bug — your instinct is to do it in the current conversation. Every file Claude reads, every search it runs, every dead end it explores fills up your context window with information that's useful for the search but irrelevant to the actual task.
+
+**Subagents** solve this. They run in a separate context window, explore as extensively as needed, and return a condensed summary. Your main context stays clean.
+
+I use this pattern constantly:
+
+- **"Explore the codebase for all places we handle auth"** — subagent reads 20 files, returns a 10-line summary
+- **"Research how next-mdx-remote handles frontmatter"** — subagent fetches docs and examples, returns the relevant pattern
+- **"Find all components using the old Button API"** — subagent greps extensively, returns a list
+
+The mental model: subagents are research assistants. You send them out to investigate, they come back with a briefing. You never see the 50 tabs they opened.
+
+Without subagents, a complex investigation can burn half your context on exploration before you've written a single line of code. With them, you keep the main context focused on decisions and implementation.
+
+## CLAUDE.md as Infrastructure
+
+Your `CLAUDE.md` file loads at the start of every session. It's the first thing Claude reads, every time. This makes it powerful — and dangerous.
+
+**What to include:**
+- Tech stack and framework versions
+- Project structure (brief, not exhaustive)
+- Key conventions (import aliases, naming patterns, commit style)
+- Commands to run (dev, build, lint, test)
+- Non-obvious rules ("we use Tailwind v4, not v3" or "always use named exports")
+
+**What to cut:**
+- Lengthy explanations of why conventions exist
+- Copy-pasted documentation
+- Historical context that doesn't affect current work
+- Anything longer than a few lines that could be in a separate file
+
+The trap is treating CLAUDE.md like documentation. It's not documentation — it's a set of standing instructions with a token budget. Every line you add competes for attention with your actual task. I've seen cases where a bloated CLAUDE.md caused Claude to ignore explicit instructions in the conversation because the standing context was overwhelming.
+
+Treat it like code. Review it regularly. If a line isn't changing Claude's behavior, delete it. If you're not sure, remove it for a few sessions and see if anything breaks.
+
+## The Two-Correction Rule
+
+Here's a pattern I wish I'd learned earlier: **if you've corrected Claude more than twice on the same issue, clear the conversation and start fresh.**
+
+When you correct a mistake, the failed attempt stays in the context. Correct it again, and now you have two failed approaches competing with the successful one for the model's attention. The context is polluted with misleading signal, and each subsequent attempt is more likely to regress.
+
+A clean session with a better prompt — one that incorporates what you learned from the failures — almost always outperforms a long session with accumulated corrections. It feels wasteful to throw away the conversation, but you're not throwing away knowledge. You're throwing away noise.
+
+This is counterintuitive because in human conversations, corrections build understanding. With an AI model, corrections build context clutter. The model doesn't "learn" from being corrected within a session the way a human does — it just has more tokens to attend to, including the wrong ones.
+
+My rule of thumb: first correction is free. Second correction, pay attention. Third correction, clear and restart with everything you now know baked into the opening prompt.
+
+## The Pattern Behind the Patterns
+
+All four of these practices point to the same underlying principle: **your job isn't to write code through Claude — it's to manage what Claude can see.**
+
+Verification gives Claude a feedback loop that doesn't consume your attention. Subagents protect your context from exploration noise. A lean CLAUDE.md ensures standing instructions actually get followed. The two-correction rule prevents context pollution from failed approaches.
+
+The developers getting the most out of AI coding tools aren't the ones writing the cleverest prompts. They're the ones who've developed an intuition for context — when it's clean, when it's cluttered, and when it's time to start fresh.

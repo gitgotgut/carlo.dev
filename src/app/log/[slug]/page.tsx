@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LogEntryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
   let post
@@ -37,11 +37,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <main className="mx-auto max-w-3xl px-6 py-24">
       <Link
-        href="/blog"
+        href="/log"
         className="mb-8 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to blog
+        Back to Log
       </Link>
 
       <header className="mb-10">

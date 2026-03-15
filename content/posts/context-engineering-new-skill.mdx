@@ -1,0 +1,62 @@
+---
+title: "Context Engineering Is the New Developer Skill"
+date: "2026-03-15"
+description: "Prompt engineering got all the hype. The real skill is managing what your AI actually sees."
+tags: ["ai", "context-engineering", "developer-tools", "claude"]
+---
+
+# Context Engineering Is the New Developer Skill
+
+You spent the last two years getting better at writing prompts. You learned to be specific, to give examples, to say "think step by step." And it helped — for a while. But if you've been using AI coding tools seriously, you've probably noticed something: the quality of your prompt matters less than what the model can see when it processes that prompt.
+
+That shift has a name. It's called **context engineering**, and it's quietly becoming the skill that separates developers who get reliable results from AI from those who keep fighting the same tool.
+
+## The One Constraint That Explains Everything
+
+Every best practice for working with AI coding tools traces back to a single constraint: **the context window fills up fast, and performance degrades as it fills.**
+
+Think of it like working memory. You can hold maybe seven things in your head at once. An AI model has a much larger window — hundreds of thousands of tokens — but it's still finite. And unlike a database, it doesn't treat all information equally. As the window fills, the model's ability to attend to specific details drops. Research from Anthropic suggests precision starts declining around 70% context usage, with hallucinations increasing notably past 85%.
+
+This isn't a bug. It's the fundamental architecture. And once you internalize it, every other best practice clicks into place. Why should you use subagents? To protect your main context. Why should you keep CLAUDE.md concise? Because bloated instructions get ignored. Why should you clear your session after two failed corrections? Because failed attempts pollute the window with misleading signal.
+
+The context window is the resource you're managing. Everything else is a tactic.
+
+## From Prompt Engineering to Context Engineering
+
+**Prompt engineering** is about crafting a single input — choosing the right words, structure, and examples to get a good output. It's a discrete act. You write a prompt, you get a result.
+
+**Context engineering** is different. [Anthropic defines it](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) as "strategies for curating and maintaining the optimal set of tokens during LLM inference." That's a mouthful, but the key word is *maintaining*. It's not a one-shot thing. It's an ongoing process of deciding what information the model sees, when it sees it, and when to remove it.
+
+The difference matters because AI coding sessions aren't single prompts. They're conversations that can run for hours, accumulating context with every file read, every search result, every failed attempt. If you're only thinking about your next message, you're missing the bigger picture — the total state of what the model is working with.
+
+Here's a concrete example. Say you ask Claude to refactor a module. It reads five files, tries an approach that doesn't work, you correct it, it tries again. By now, the context contains the original files, the failed approach, your correction, and the second attempt. The model is attending to all of that, including the wrong approach. A context engineer would recognize this and either clear the session or use a subagent for the exploration, keeping the main context clean for the actual implementation.
+
+## The Hybrid Retrieval Model
+
+The most effective pattern I've seen is what Anthropic calls **hybrid retrieval**: combining upfront loading with just-in-time search.
+
+**Upfront loading** means giving the model essential context before it starts working. In Claude Code, this is your `CLAUDE.md` file — project conventions, tech stack, file structure, things the model needs on every task. It loads automatically at the start of every session, like pinning important notes to the top of your desk.
+
+**Just-in-time retrieval** means letting the model search for specific information as it needs it — reading files, running grep, exploring the codebase. This is slower but more precise. The model doesn't carry everything in memory; it knows how to find things.
+
+The combination works because it mirrors how humans actually operate. You don't memorize your entire codebase. You know the high-level architecture (upfront) and you know how to find specific implementations when you need them (just-in-time). The same pattern, applied to an AI tool, gives you the best of both worlds: speed from pre-loaded context and precision from targeted search.
+
+The trap is loading too much upfront. A CLAUDE.md file that's 500 lines long isn't giving the model useful context — it's consuming attention budget that could go toward your actual task. Treat it like code: prune regularly, test by observing behavior, keep only what actually changes outcomes.
+
+## What This Means for Developers
+
+Context engineering isn't really a technical skill. It's **information architecture applied to a conversation.**
+
+You're making decisions like:
+- What does the model need to know right now vs. what can it look up later?
+- Has the context been polluted by failed attempts, and should I start fresh?
+- Should this exploration happen in the main context or in a subagent?
+- Is my CLAUDE.md earning its token cost, or is it dead weight?
+
+These are design decisions. They're closer to the thinking you do when structuring a database schema or designing an API than to writing code. And like those skills, they develop through practice and pattern recognition, not by memorizing rules.
+
+If you come from a management or systems thinking background, you might recognize this as delegation and information flow. You're not doing the work — you're deciding what information the worker needs, filtering noise, and keeping the channel clear. The better you get at this, the more capable the tool becomes in your hands.
+
+Context engineering is the developer skill that didn't exist three years ago. As models grow more capable and context windows expand, the developers who've built intuition for managing context won't just be faster — they'll be able to tackle problems that were impractical before. The skill compounds, because every improvement in model capability amplifies good context management.
+
+The prompt is just the last message. The context is everything.
