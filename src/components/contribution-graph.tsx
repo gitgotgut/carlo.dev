@@ -92,6 +92,14 @@ export function ContributionGraph({
     return { grid: weeks, monthHeaders: months, maxCount: max }
   }, [days])
 
+  const activeDays = useMemo(
+    () =>
+      days
+        .filter((d) => d.count > 0)
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [days]
+  )
+
   const graphWidth = 53 * TOTAL + 32
 
   return (
@@ -200,6 +208,32 @@ export function ContributionGraph({
             day: "numeric",
             year: "numeric",
           })}
+        </div>
+      )}
+
+      {/* Recent activity list */}
+      {activeDays.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Recent activity</p>
+          <div className="flex flex-wrap gap-2">
+            {activeDays.slice(0, 20).map((day) => (
+              <span
+                key={day.date}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs"
+              >
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${LEVEL_CLASSES[getContributionLevel(day.count, maxCount)]}`}
+                />
+                <span className="text-muted-foreground">
+                  {new Date(day.date + "T12:00:00").toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+                <span className="font-medium">{day.count}</span>
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>
