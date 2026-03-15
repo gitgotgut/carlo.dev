@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import type { ContributionDay } from "@/lib/github"
 
 interface ContributionGraphProps {
@@ -40,6 +40,7 @@ export function ContributionGraph({
   days,
   totalContributions,
 }: ContributionGraphProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<{
     date: string
     count: number
@@ -103,7 +104,7 @@ export function ContributionGraph({
   const graphWidth = 53 * TOTAL + 32
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="relative w-full overflow-x-auto" ref={containerRef}>
       <div className="mb-3">
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">
@@ -161,11 +162,13 @@ export function ContributionGraph({
                       style={{ width: CELL_SIZE, height: CELL_SIZE }}
                       onMouseEnter={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect()
+                        const containerRect = containerRef.current?.getBoundingClientRect()
+                        if (!containerRect) return
                         setTooltip({
                           date: day.date,
                           count: day.count,
-                          x: rect.left + rect.width / 2,
-                          y: rect.top,
+                          x: rect.left - containerRect.left + rect.width / 2,
+                          y: rect.top - containerRect.top,
                         })
                       }}
                       onMouseLeave={() => setTooltip(null)}
@@ -194,7 +197,7 @@ export function ContributionGraph({
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-full rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-lg"
+          className="pointer-events-none absolute z-50 -translate-x-1/2 -translate-y-full rounded-md bg-foreground px-2.5 py-1.5 text-xs font-medium text-background shadow-lg"
           style={{ left: tooltip.x, top: tooltip.y - 8 }}
         >
           <span className="font-semibold">
