@@ -6,6 +6,15 @@ export interface ContributionDay {
   count: number
 }
 
+export interface RepoCommit {
+  date: string
+  message: string
+}
+
+export interface RepoLanguages {
+  [language: string]: number
+}
+
 /**
  * Safely fetch JSON from a URL, returning null on any error.
  */
@@ -13,8 +22,20 @@ async function safeFetchJson(url: string): Promise<unknown> {
   try {
     const res = await fetch(url, {
       headers: githubHeaders(),
-      next: { revalidate: 86400 },
+      next: { revalidate: 3600 },
     })
+    // GitHub Stats API returns 202 when computing — retry once after a short delay
+    if (res.status === 202) {
+      await new Promise((r) => setTimeout(r, 2000))
+      const retry = await fetch(url, {
+        headers: githubHeaders(),
+        next: { revalidate: 3600 },
+      })
+      if (!retry.ok) return null
+      const text = await retry.text()
+      if (!text || text.trim().length === 0) return null
+      return JSON.parse(text)
+    }
     if (!res.ok) return null
     const text = await res.text()
     if (!text || text.trim().length === 0) return null
@@ -37,7 +58,6 @@ async function fetchRepos(): Promise<string[]> {
 
 /**
  * Fetch commit activity (last 52 weeks) for a single repo.
- * GitHub's stats API may return 202 (computing) on first call — we handle gracefully.
  */
 async function fetchWeeklyActivity(
   repo: string
@@ -51,7 +71,6 @@ async function fetchWeeklyActivity(
 
 /**
  * Aggregate contribution data across all repos into a daily heatmap.
- * Fetched server-side with 24h ISR revalidation.
  */
 export async function getContributionData(): Promise<{
   days: ContributionDay[]
@@ -90,8 +109,44 @@ export async function getContributionData(): Promise<{
 
     return { days, totalContributions }
   } catch {
-    // Graceful fallback if GitHub API is unavailable during build
     return { days: [], totalContributions: 0 }
+  }
+}
+
+/**
+ * Fetch commit history for a specific repo.
+ */
+export async function getRepoCommits(repoName: string): Promise<RepoCommit[]> {
+  try {
+    const data = await safeFetchJson(
+      `${GITHUB_API}/repos/${GITHUB_USERNAME}/${repoName}/commits?per_page=100`
+    )
+    if (!Array.isArray(data)) return []
+    return data.map(
+      (c: { commit: { author: { date: string }; message: string } }) => ({
+        date: c.commit.author.date,
+        message: c.commit.message.split("\n")[0], // first line only
+      })
+    )
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Fetch language breakdown for a specific repo.
+ */
+export async function getRepoLanguages(
+  repoName: string
+): Promise<RepoLanguages> {
+  try {
+    const data = await safeFetchJson(
+      `${GITHUB_API}/repos/${GITHUB_USERNAME}/${repoName}/languages`
+    )
+    if (!data || typeof data !== "object") return {}
+    return data as RepoLanguages
+  } catch {
+    return {}
   }
 }
 
