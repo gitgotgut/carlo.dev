@@ -2,16 +2,25 @@
 
 import { useRef } from "react"
 import Link from "next/link"
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+} from "framer-motion"
+import type { MotionValue } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BlurFade } from "@/components/ui/blur-fade"
-import { Particles } from "@/components/ui/particles"
-import { RetroGrid } from "@/components/ui/retro-grid"
-import { HyperText } from "@/components/ui/hyper-text"
-import { TypingAnimation } from "@/components/ui/typing-animation"
-import { NeonGradientCard } from "@/components/ui/neon-gradient-card"
-import { BorderBeam } from "@/components/ui/border-beam"
+import { AuroraText } from "@/components/ui/aurora-text"
+import { MorphingText } from "@/components/ui/morphing-text"
+import { TextReveal } from "@/components/ui/text-reveal"
+import { MagicCard } from "@/components/ui/magic-card"
+import {
+  ScrollVelocityContainer,
+  ScrollVelocityRow,
+} from "@/components/ui/scroll-based-velocity"
 import { projects } from "@/lib/projects"
 
 interface LatestPost {
@@ -23,23 +32,58 @@ interface LatestPost {
 
 const featuredProjects = projects.filter((p) => p.featured).slice(0, 3)
 
-function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
+/* ── Floating blob that moves on scroll ── */
+function FloatingBlob({
+  className,
+  scrollProgress,
+  yRange,
+  xRange,
+}: {
+  className: string
+  scrollProgress: MotionValue<number>
+  yRange: [number, number]
+  xRange: [number, number]
+}) {
+  const y = useTransform(scrollProgress, [0, 1], yRange)
+  const x = useTransform(scrollProgress, [0, 1], xRange)
+  return (
+    <motion.div
+      style={{ y, x }}
+      className={`pointer-events-none absolute rounded-full blur-3xl ${className}`}
+    />
+  )
+}
+
+/* ── Card with subtle 3D tilt on hover ── */
+function TiltCard({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
   const ref = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 })
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 })
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [6, -6]), {
+    stiffness: 200,
+    damping: 20,
+  })
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-6, 6]), {
+    stiffness: 200,
+    damping: 20,
+  })
 
   function handleMouse(e: React.MouseEvent) {
     const rect = ref.current?.getBoundingClientRect()
     if (!rect) return
-    x.set((e.clientX - rect.left) / rect.width - 0.5)
-    y.set((e.clientY - rect.top) / rect.height - 0.5)
+    mx.set((e.clientX - rect.left) / rect.width - 0.5)
+    my.set((e.clientY - rect.top) / rect.height - 0.5)
   }
 
   function handleLeave() {
-    x.set(0)
-    y.set(0)
+    mx.set(0)
+    my.set(0)
   }
 
   return (
@@ -55,102 +99,156 @@ function TiltCard({ children, className }: { children: React.ReactNode; classNam
   )
 }
 
-export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
-  const heroRef = useRef<HTMLElement>(null)
+export function LandingContent({
+  latestPosts,
+}: {
+  latestPosts: LatestPost[]
+}) {
+  /* ── Full-page scroll progress for blob movement ── */
+  const pageRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
+    target: pageRef,
+    offset: ["start start", "end end"],
+  })
+
+  /* ── Hero-specific scroll for parallax fade-out ── */
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress: heroScroll } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   })
-  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95])
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 100])
+  const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0])
+  const heroY = useTransform(heroScroll, [0, 1], [0, 150])
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
+    <div ref={pageRef} className="relative flex flex-col overflow-x-clip">
+      {/* ── Floating gradient blobs that travel with scroll ── */}
+      <FloatingBlob
+        scrollProgress={scrollYProgress}
+        yRange={[-100, 600]}
+        xRange={[0, 120]}
+        className="left-[-10%] top-[5%] h-[500px] w-[500px] bg-purple-500/20 dark:bg-purple-500/10"
+      />
+      <FloatingBlob
+        scrollProgress={scrollYProgress}
+        yRange={[0, 900]}
+        xRange={[0, -80]}
+        className="right-[-8%] top-[15%] h-[400px] w-[400px] bg-blue-400/20 dark:bg-blue-400/10"
+      />
+      <FloatingBlob
+        scrollProgress={scrollYProgress}
+        yRange={[200, 1200]}
+        xRange={[-40, 60]}
+        className="left-[10%] top-[40%] h-[350px] w-[350px] bg-rose-400/15 dark:bg-rose-400/8"
+      />
+      <FloatingBlob
+        scrollProgress={scrollYProgress}
+        yRange={[100, 1400]}
+        xRange={[50, -100]}
+        className="right-[5%] top-[60%] h-[300px] w-[300px] bg-amber-300/15 dark:bg-amber-300/8"
+      />
+
+      {/* ══════════════════════════════════════════════
+          HERO — Full viewport, parallax fade-out
+          ══════════════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center"
+        className="relative flex min-h-[100vh] flex-col items-center justify-center px-4 text-center"
       >
-        {/* Sci-fi background — RetroGrid + Particles (removed Meteors to reduce density) */}
-        <RetroGrid
-          className="opacity-30"
-          angle={65}
-          cellSize={60}
-          darkLineColor="rgba(0,255,241,0.12)"
-          lightLineColor="rgba(100,100,100,0.1)"
-        />
-        <Particles
-          className="absolute inset-0"
-          quantity={40}
-          staticity={20}
-          ease={80}
-          color="#00FFF1"
-          size={0.4}
-        />
-
         <motion.div
-          style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+          style={{ opacity: heroOpacity, y: heroY }}
           className="relative z-10 max-w-3xl"
         >
-          <BlurFade delay={0.1} duration={0.6}>
+          <BlurFade delay={0.1} duration={0.7}>
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               Hi, I&apos;m{" "}
-              <HyperText
-                as="span"
-                duration={1200}
-                className="inline bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent text-5xl sm:text-6xl lg:text-7xl py-0"
-                animateOnHover
+              <AuroraText
+                colors={["#7c3aed", "#3b82f6", "#ec4899", "#f59e0b"]}
+                speed={1}
+                className="text-5xl font-bold sm:text-6xl lg:text-7xl"
               >
                 Carlo
-              </HyperText>
+              </AuroraText>
             </h1>
           </BlurFade>
 
-          <BlurFade delay={0.4} duration={0.6}>
-            <div className="mt-6 text-lg text-muted-foreground sm:text-xl">
-              <TypingAnimation
-                as="p"
-                words={[
-                  "I bridge business problems and technical solutions through design.",
-                  "Building tools that solve real problems for real teams.",
-                  "Combining IT management with software design thinking.",
+          <BlurFade delay={0.4} duration={0.7}>
+            <div className="mt-8">
+              <MorphingText
+                texts={[
+                  "Design thinker.",
+                  "IT strategist.",
+                  "Problem solver.",
+                  "Builder.",
                 ]}
-                duration={40}
-                deleteSpeed={20}
-                pauseDelay={2000}
-                loop
-                className="text-lg text-muted-foreground sm:text-xl leading-normal"
-                cursorStyle="block"
+                className="text-muted-foreground"
               />
             </div>
           </BlurFade>
 
-          <BlurFade delay={0.7} duration={0.6}>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <BlurFade delay={0.8} duration={0.7}>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="/projects"
-                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:shadow-lg hover:shadow-cyan-500/25"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-medium text-background transition-all hover:scale-105 hover:shadow-xl"
               >
-                <BorderBeam size={40} duration={4} colorFrom="#00FFF1" colorTo="#ff00aa" />
-                View My Work{" "}
+                View My Work
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/about"
-                className="relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-border px-6 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-md"
+                className="inline-flex items-center justify-center rounded-full border border-border px-7 py-3.5 text-sm font-medium transition-all hover:bg-muted hover:scale-105"
               >
                 About Me
               </Link>
             </div>
           </BlurFade>
         </motion.div>
+
+        {/* Scroll hint */}
+        <motion.div
+          style={{ opacity: useTransform(heroScroll, [0, 0.15], [1, 0]) }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" as const }}
+            className="h-10 w-6 rounded-full border-2 border-muted-foreground/30 p-1"
+          >
+            <motion.div className="mx-auto h-2 w-1 rounded-full bg-muted-foreground/50" />
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* Featured Projects */}
-      <section className="mx-auto w-full max-w-6xl px-4 py-20">
+      {/* ══════════════════════════════════════════════
+          SCROLL TEXT REVEAL — Statement section
+          ══════════════════════════════════════════════ */}
+      <section className="relative z-10">
+        <TextReveal>
+          I bridge business problems and technical solutions through design — building tools that solve real problems for real teams.
+        </TextReveal>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          VELOCITY SCROLL — Kinetic divider
+          ══════════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 opacity-[0.08]">
+        <ScrollVelocityContainer>
+          <ScrollVelocityRow
+            baseVelocity={2}
+            className="text-7xl font-bold tracking-tight sm:text-8xl"
+          >
+            <span className="mx-4">Projects &middot; Design &middot; Code &middot;</span>
+          </ScrollVelocityRow>
+        </ScrollVelocityContainer>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          FEATURED PROJECTS — MagicCard with tilt
+          ══════════════════════════════════════════════ */}
+      <section className="relative z-10 mx-auto w-full max-w-6xl px-4 py-20">
         <BlurFade inView inViewMargin="-100px" delay={0}>
-          <div className="mb-12 text-center">
+          <div className="mb-14 text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Featured Projects
             </h2>
@@ -160,22 +258,30 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
           </div>
         </BlurFade>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" style={{ perspective: "1000px" }}>
+        <div
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+          style={{ perspective: "1200px" }}
+        >
           {featuredProjects.map((project, i) => (
-            <BlurFade key={project.title} inView inViewMargin="-50px" delay={i * 0.15}>
+            <BlurFade
+              key={project.title}
+              inView
+              inViewMargin="-50px"
+              delay={i * 0.12}
+            >
               <TiltCard>
-                <Link href={`/projects/${project.slug}`}>
-                  <NeonGradientCard
-                    borderSize={1}
-                    borderRadius={16}
-                    neonColors={{
-                      firstColor: i === 0 ? "#00FFF1" : i === 1 ? "#ff00aa" : "#9c40ff",
-                      secondColor: i === 0 ? "#9c40ff" : i === 1 ? "#00FFF1" : "#ff00aa",
-                    }}
-                    className="cursor-pointer transition-transform"
+                <Link href={`/projects/${project.slug}`} className="block h-full">
+                  <MagicCard
+                    className="h-full cursor-pointer rounded-2xl border border-border/50 p-6"
+                    gradientSize={250}
+                    gradientFrom="#7c3aed"
+                    gradientTo="#3b82f6"
+                    gradientOpacity={0.15}
                   >
                     <h3 className="text-lg font-semibold">{project.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {project.description}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {project.tags.map((tag) => (
                         <Badge key={tag} variant="secondary" className="text-xs">
@@ -183,7 +289,7 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
                         </Badge>
                       ))}
                     </div>
-                  </NeonGradientCard>
+                  </MagicCard>
                 </Link>
               </TiltCard>
             </BlurFade>
@@ -191,23 +297,25 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
         </div>
 
         <BlurFade inView delay={0.3}>
-          <div className="mt-8 text-center">
+          <div className="mt-10 text-center">
             <Link
               href="/projects"
               className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              View all projects{" "}
+              View all projects
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </BlurFade>
       </section>
 
-      {/* Latest Log Entries */}
+      {/* ══════════════════════════════════════════════
+          LATEST LOG ENTRIES
+          ══════════════════════════════════════════════ */}
       {latestPosts.length > 0 && (
-        <section className="mx-auto w-full max-w-6xl px-4 py-20">
+        <section className="relative z-10 mx-auto w-full max-w-6xl px-4 py-20">
           <BlurFade inView inViewMargin="-100px" delay={0}>
-            <div className="mb-12 text-center">
+            <div className="mb-14 text-center">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Latest Log Entries
               </h2>
@@ -219,9 +327,20 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {latestPosts.map((post, i) => (
-              <BlurFade key={post.slug} inView inViewMargin="-50px" delay={i * 0.15}>
+              <BlurFade
+                key={post.slug}
+                inView
+                inViewMargin="-50px"
+                delay={i * 0.12}
+              >
                 <Link href={`/log/${post.slug}`}>
-                  <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+                  <MagicCard
+                    className="h-full cursor-pointer rounded-2xl border border-border/50 p-6"
+                    gradientSize={200}
+                    gradientFrom="#ec4899"
+                    gradientTo="#f59e0b"
+                    gradientOpacity={0.12}
+                  >
                     <h3 className="text-lg font-semibold">{post.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {new Date(post.date).toLocaleDateString("en-US", {
@@ -230,20 +349,22 @@ export function LandingContent({ latestPosts }: { latestPosts: LatestPost[] }) {
                         day: "numeric",
                       })}
                     </p>
-                    <p className="mt-3 text-sm text-muted-foreground">{post.description}</p>
-                  </div>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      {post.description}
+                    </p>
+                  </MagicCard>
                 </Link>
               </BlurFade>
             ))}
           </div>
 
           <BlurFade inView delay={0.3}>
-            <div className="mt-8 text-center">
+            <div className="mt-10 text-center">
               <Link
                 href="/log"
                 className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                Read the log{" "}
+                Read the log
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
